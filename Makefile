@@ -20,7 +20,7 @@ rebuild: | clean
 
 .PHONY: clean
 clean:
-	$(RM) $(BIN) $(wildcard $(BIN)-g*.tar) $(wildcard *.d)
+	$(RM) $(BIN) $(wildcard $(BIN)-g*.tar) $(wildcard *.d) $(OBJ)
 
 %.c.o : %.c
 	$(CC) $(CFLAGS) $(FUSE_FLAGS) -c -o $@ $<
