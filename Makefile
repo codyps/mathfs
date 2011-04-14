@@ -1,5 +1,5 @@
-SRC = fs.c
-BIN = msh
+OBJ = fs.c.o
+BIN = mathfs
 
 CC = gcc
 RM = rm -f
@@ -22,7 +22,10 @@ rebuild: | clean
 clean:
 	$(RM) $(BIN) $(wildcard $(BIN)-g*.tar) $(wildcard *.d)
 
-$(BIN): $(SRC)
+%.c.o : %.c
+	$(CC) $(CFLAGS) $(FUSE_FLAGS) -c -o $@ $<
+
+$(BIN): $(OBJ)
 	$(CC) $(CFLAGS) $(FUSE_FLAGS) -o $@ $^
 
 .PHONY: archive
