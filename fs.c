@@ -1,5 +1,6 @@
-#include <fuse.h>
 
+#define FUSE_USE_VERSION 28
+#include <fuse.h>
 
 static int m_getattr(const char *path, struct stat *stbuf)
 {

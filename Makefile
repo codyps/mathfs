@@ -5,7 +5,7 @@ CC = gcc
 RM = rm -f
 
 CFLAGS = -ggdb -O2
-override CFLAGS += -Wall -pedantic -pipe -MMD
+override CFLAGS += -Wall -pipe -MMD
 FUSE_FLAGS := $(shell pkg-config fuse --cflags --libs)
 
 .PHONY: all
