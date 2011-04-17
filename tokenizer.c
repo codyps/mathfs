@@ -2,6 +2,29 @@
 #include <string.h>
 #include <stdio.h>
 
+typedef enum {
+ERR_NONE = 0,
+ERR_UNDEF_OP,
+ERR_TOO_FEW,
+ERR_NOT_INT,
+} error_t;
+
+char const *error_msg(error_t err)
+{
+	switch (err) {
+	case ERR_NONE:
+		return "";
+	case ERR_UNDEF_OP:
+		return "undefined operation";
+	case ERR_TOO_FEW:
+		return "too few parameters";
+	case ERR_NOT_INT:
+		return "parameter must be an integer";
+	default:
+		return "an unknown error has occured";
+	}
+}
+
 /*
  * Parameter Stack
  */
@@ -35,24 +58,30 @@ double stack_pop(stack_t **head)
 /*
  * Supported Operations
  */
-typedef int (*op_t)(stack_t **params);
+typedef error_t (*op_t)(stack_t **params);
 typedef struct {
 	char const *name;
 	op_t func;
 } op_table_t;
 
-int add(stack_t **params)
+error_t add(stack_t **params)
 {
+	if (stack_isempty(params)) return ERR_TOO_FEW;
 	double x = stack_pop(params);
+	if (stack_isempty(params)) return ERR_TOO_FEW;
 	double y = stack_pop(params);
+
 	stack_push(params, x + y);
 	return 0;
 }
 
-int sub(stack_t **params)
+error_t sub(stack_t **params)
 {
+	if (stack_isempty(params)) return ERR_TOO_FEW;
 	double x = stack_pop(params);
+	if (stack_isempty(params)) return ERR_TOO_FEW;
 	double y = stack_pop(params);
+
 	stack_push(params, x - y);
 	return 0;
 }
@@ -76,7 +105,7 @@ op_t op_lookup(op_table_t const *table, char const *start, const char *end)
 /*
  * Tokenizer
  */
-int tokpath(op_table_t const *ops, stack_t **stack, char const *path)
+error_t tokpath(op_table_t const *ops, stack_t **stack, char const *path)
 {
 	size_t const  len = strlen(path);
 	char   const *end = path + len - 1;
@@ -100,13 +129,10 @@ int tokpath(op_table_t const *ops, stack_t **stack, char const *path)
 			stack_push(stack, value);
 		} else {
 			op_t op = op_lookup(ops, start, end);
+			if (!op) return ERR_UNDEF_OP;
 
-			if (op) {
-				op(stack);
-			} else {
-				fprintf(stderr, "err: no such function\n");
-				return 1;
-			}
+			error_t err = op(stack);
+			if (err) return err;
 		}
 		end = p - 1;
 	}
@@ -115,6 +141,12 @@ int tokpath(op_table_t const *ops, stack_t **stack, char const *path)
 
 int main(int argc, char **argv)
 {
+	if (argc <= 1) {
+		fprintf(stderr, "err: incorrect number of parameters\n");
+		fprintf(stderr, "usage: ./mathfs <command>\n");
+		return ERR_TOO_FEW;
+	}
+
 	op_table_t ops[] = {
 		{ "add", &add },
 		{ "sub", &sub },
@@ -122,12 +154,16 @@ int main(int argc, char **argv)
 	};
 	stack_t *stack = 0;
 
-	int ret = tokpath(ops, &stack, argv[1]);
+	error_t err = tokpath(ops, &stack, argv[1]);
 
-	while (!stack_isempty(&stack)) {
-		double value = stack_pop(&stack);
-		if (!ret)
+	// Whatever is left on the stack is the output.
+	if (!err) {
+		while (!stack_isempty(&stack)) {
+			double value = stack_pop(&stack);
 			printf("%f\n", value);
+		}
+	} else {
+		fprintf(stderr, "err: %s\n", error_msg(err));
 	}
-	return ret;
+	return err;
 }
