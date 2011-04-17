@@ -81,29 +81,25 @@ int tokpath(op_table_t const *ops, stack_t **stack, char const *path)
 	size_t const  len = strlen(path);
 	char   const *end = path + len - 1;
 
-	for (const char *start = end; start >= path; --start) {
-		char const *tok;
-
-		// Everything remaining is a token.
-		if (start == path)
-			tok = start;
-		// Ignore the leading slash.
-		else if (*start == '/')
-			tok = start + 1;
-		// Add to existing token.
-		else
+	for (const char *p = end; p >= path; --p) {
+		// Decide when to start a new token.
+		char const *start;
+		if (p == path) {
+			start = p;
+		} else if (*p == '/') {
+			start = p + 1;
+		} else {
 			continue;
+		}
 
+		// All doubles are parameters; everything else is an operation.
 		double value;
-		int ret = sscanf(tok, "%lf", &value);
+		int ret = sscanf(start, "%lf", &value);
 
-		// Valid double; push it onto the list of parameters.
 		if (ret == 1) {
 			stack_push(stack, value);
-		}
-		// If not a double, treat it as a command.
-		else {
-			op_t op = op_lookup(ops, tok, end);
+		} else {
+			op_t op = op_lookup(ops, start, end);
 
 			if (op) {
 				op(stack);
@@ -112,8 +108,7 @@ int tokpath(op_table_t const *ops, stack_t **stack, char const *path)
 				return 1;
 			}
 		}
-
-		end = start - 1;
+		end = p - 1;
 	}
 	return 0;
 }
