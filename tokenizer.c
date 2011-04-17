@@ -5,28 +5,28 @@
 /*
  * Parameter Stack
  */
-typedef struct param_s {
+typedef struct stack_s {
 	double value;
-	struct param_s *next;
-} param_t;
+	struct stack_s *next;
+} stack_t;
 
-int param_isempty(param_t **head)
+int stack_isempty(stack_t **head)
 {
 	return !(*head);
 }
 
-void param_push(param_t **head, double value)
+void stack_push(stack_t **head, double value)
 {
-	param_t *node = malloc(sizeof(param_t));
+	stack_t *node = malloc(sizeof(stack_t));
 	node->value = value;
 	node->next  = *head;
 	*head = node;
 }
 
-double param_pop(param_t **head)
+double stack_pop(stack_t **head)
 {
 	double value = (*head)->value;
-	param_t *next = (*head)->next;
+	stack_t *next = (*head)->next;
 	free(*head);
 	*head = next;
 	return value;
@@ -35,27 +35,27 @@ double param_pop(param_t **head)
 /*
  * Supported Operations
  */
-int add(param_t **params)
-{
-	double x = param_pop(params);
-	double y = param_pop(params);
-	param_push(params, x + y);
-	return 0;
-}
-
-int sub(param_t **params)
-{
-	double x = param_pop(params);
-	double y = param_pop(params);
-	param_push(params, x - y);
-	return 0;
-}
-
-typedef int (*op_t)(param_t **params);
+typedef int (*op_t)(stack_t **params);
 typedef struct {
 	char const *name;
 	op_t func;
 } op_table_t;
+
+int add(stack_t **params)
+{
+	double x = stack_pop(params);
+	double y = stack_pop(params);
+	stack_push(params, x + y);
+	return 0;
+}
+
+int sub(stack_t **params)
+{
+	double x = stack_pop(params);
+	double y = stack_pop(params);
+	stack_push(params, x - y);
+	return 0;
+}
 
 op_t op_lookup(op_table_t const *table, char const *start, const char *end)
 {
@@ -76,7 +76,7 @@ op_t op_lookup(op_table_t const *table, char const *start, const char *end)
 /*
  * Tokenizer
  */
-int tokpath(op_table_t const *ops, param_t **stack, char const *path)
+int tokpath(op_table_t const *ops, stack_t **stack, char const *path)
 {
 	size_t const  len = strlen(path);
 	char   const *end = path + len - 1;
@@ -99,7 +99,7 @@ int tokpath(op_table_t const *ops, param_t **stack, char const *path)
 
 		// Valid double; push it onto the list of parameters.
 		if (ret == 1) {
-			param_push(stack, value);
+			stack_push(stack, value);
 		}
 		// If not a double, treat it as a command.
 		else {
@@ -125,12 +125,12 @@ int main(int argc, char **argv)
 		{ "sub", &sub },
 		{ 0,     0   }
 	};
-	param_t *stack = 0;
+	stack_t *stack = 0;
 
 	int ret = tokpath(ops, &stack, argv[1]);
 
-	while (!param_isempty(&stack)) {
-		double value = param_pop(&stack);
+	while (!stack_isempty(&stack)) {
+		double value = stack_pop(&stack);
 		if (!ret)
 			printf("%f\n", value);
 	}
