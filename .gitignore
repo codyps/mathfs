@@ -1,3 +1,6 @@
 *.o
 *~
+*.d
+mathfs
+tokenizer
 

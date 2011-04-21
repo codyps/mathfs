@@ -1,5 +1,11 @@
-OBJ = fs.c.o
-BIN = mathfs
+OBJ = 
+BIN = mathfs tokenizer
+
+.PHONY: all
+all: build
+
+mathfs: fs.c.o
+tokenizer: eval.c.o tokenizer.c.o
 
 CC = gcc
 RM = rm -f
@@ -8,8 +14,6 @@ CFLAGS = -ggdb -O2
 override CFLAGS += -Wall -pipe -MMD
 FUSE_FLAGS := $(shell pkg-config fuse --cflags --libs)
 
-.PHONY: all
-all: build
 
 .PHONY: build
 build: $(BIN)
@@ -20,7 +24,7 @@ rebuild: | clean
 
 .PHONY: clean
 clean:
-	$(RM) $(BIN) $(wildcard $(BIN)-g*.tar) $(wildcard *.d) $(OBJ)
+	$(RM) $(BIN) $(BIN)-g*.tar *.d *.o $(OBJ)
 
 %.c.o : %.c
 	$(CC) $(CFLAGS) $(FUSE_FLAGS) -c -o $@ $<
