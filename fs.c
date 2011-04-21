@@ -1,9 +1,10 @@
 
 #define FUSE_USE_VERSION 26
-
-#define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
-
 #include <fuse.h>
+
+#include <string.h>
+#include <stdlib.h>
+#define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
 
 int fibs(int opct, double *ops)
 {
@@ -23,15 +24,15 @@ int sub(int opct, double *ops)
 struct math_op {
 	char *name;
 	int (*func)(int opct, double *ops);
-} static math_ops [] = {
+} math_ops [] = {
 	{ "add",  add },
-	{ "fibs", fibs }
-	{ "sub",  sub },
+	{ "fibs", fibs },
+	{ "sub",  sub }
 };
 
 static int math_op_cmp_by_name(const void *p1, const void *p2)
 {
-	struct math_op *m1 = p1, *m2 = p2;
+	struct math_op const *m1 = p1, *m2 = p2;
 	return strcmp(m1->name, m2->name);
 }
 
@@ -47,10 +48,10 @@ struct math_op *math_op_by_name(char *name)
 
 static int m_getattr(const char *path, struct stat *stbuf)
 {
-	memset(stbuf, 0, *stbuf);
+	memset(stbuf, 0, sizeof(*stbuf));
 	if (!strcmp(path, "/")) {
 		stbuf->st_mode  = S_IFDIR | 0755;
-		stbuf->st_nlink = S_IFDIR | 0755;
+		stbuf->st_nlink = 2;
 	}
 
 	return 0;
