@@ -1,18 +1,11 @@
 #ifndef EVAL_H_
 #define EVAL_H_
 
+#include "error.h"
+
 typedef double num_t;
 #define PRInum "f"
 #define SCNnum "lf"
-
-typedef enum {
-ERR_NONE = 0,
-ERR_UNDEF_OP,
-ERR_TOO_FEW,
-ERR_NOT_INT,
-} error_t;
-
-char const *error_msg(error_t err);
 
 typedef struct stack_s {
 	num_t value;

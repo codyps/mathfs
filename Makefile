@@ -5,7 +5,7 @@ BIN = mathfs tokenizer
 all: build
 
 mathfs: fs.c.o
-tokenizer: eval.c.o tokenizer.c.o
+tokenizer: eval.c.o tokenizer.c.o error.c.o
 
 CC = gcc
 RM = rm -f
