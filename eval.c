@@ -68,9 +68,17 @@ error_t tokpath(op_table_t const *ops, stack_t **stack, char const *path)
 {
 	size_t const  len = strlen(path);
 	char   const *end = path + len - 1;
+	char   const *last_slash = strrchr(path, '/');
+
+	if (!strcmp(last_slash + 1, "doc")) {
+		/* we need to indicate to the caller that
+		 * a doc string needs to be returned.
+		 */
+	}
+
 
 	char const *p;
-	for (p = end; p >= path; --p) {
+	for (p = last_slash; p >= path; --p) {
 		// Decide when to start a new token.
 		char const *start;
 		if (p == path) {
@@ -89,10 +97,12 @@ error_t tokpath(op_table_t const *ops, stack_t **stack, char const *path)
 			stack_push(stack, value);
 		} else {
 			op_t op = op_lookup(ops, start, end);
-			if (!op) return ERR_UNDEF_OP;
+			if (!op)
+				return ERR_UNDEF_OP;
 
 			error_t err = op(stack);
-			if (err) return err;
+			if (err)
+				return err;
 		}
 		end = p - 1;
 	}

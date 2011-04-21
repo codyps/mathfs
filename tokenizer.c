@@ -33,9 +33,9 @@ int main(int argc, char **argv)
 	}
 
 	op_table_t ops[] = {
-		{ "add", &add },
-		{ "sub", &sub },
-		{ 0,     0   }
+		{ "add", "adds 2 numbers", add },
+		{ "sub", "subtract 2 numbers", sub },
+		{}
 	};
 	stack_t *stack = 0;
 

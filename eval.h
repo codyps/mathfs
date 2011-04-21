@@ -26,6 +26,7 @@ int stack_isempty(stack_t **head);
 typedef error_t (*op_t)(stack_t **params);
 typedef struct {
 	char const *name;
+	char const *doc;
 	op_t func;
 } op_table_t;
 
