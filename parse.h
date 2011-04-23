@@ -1,6 +1,11 @@
 #ifndef PARSE_H_
 #define PARSE_H_
 
+#include "error.h"
+#include <stdlib.h> /* size_t */
+#include <stdbool.h>
+#include <stddef.h> /* offsetof */
+
 typedef double num_t;
 #define PRInum "f"
 #define SCNnum "lf"
@@ -12,6 +17,13 @@ enum token_type {
 	TT_UNK
 };
 
+#define list_for_each_prev(pos, head) \
+	for (pos = (head)->prev; pos != (head); pos = pos->prev)
+
+typedef struct plist_s {
+	struct plist_s *prev, *next;
+} plist_t;
+
 typedef error_t (op_fn)(plist_t *);
 typedef struct {
 	char const *name;
@@ -19,36 +31,40 @@ typedef struct {
 	op_fn *func;
 } op_entry;
 
-typedef struct plist_s {
-	struct item_s *next, *prev;
-} plist_t;
 
 typedef struct item_s {
 	enum token_type type;
 
 	union {
-		struct op_entry *op_e;
+		op_entry const *op_e;
 		num_t num;
 	};
-	const char *raw;
 
-	plist_t *pl;
-} token_t;
+	char *raw;
+	size_t      raw_len;
 
+	plist_t pl;
+} item_t;
 
 error_t tokpath(op_entry const *ops, plist_t *pl, char const *path);
 
 num_t plist_pop_num(plist_t *pl);
 item_t *plist_pop(plist_t *pl);
 
+void plist_push(plist_t *pl, item_t *it);
 void plist_push_num(plist_t *pl, num_t num);
-void plist_push_op(plist_t *pl, const op_entry *op);
-int  plist_push_raw(op_entry const *ops, plist_t *pl, char const *raw, char const *end);
+void plist_push_op(plist_t *pl, op_entry const *op);
+void plist_push_unk(plist_t *pl, char const *start, char const *end);
+
+void    plist_push_raw(op_entry const *ops, plist_t *pl, char const *raw, char const *end);
+item_t *item_mk(op_entry const *ops, char const *raw, char const *end);
+void    item_destroy(item_t *it);
+int item_to_string(item_t *it, char *buf, size_t len);
 
 void plist_init(plist_t *pl);
 bool plist_is_empty(plist_t *pl);
 
 #define container_of(ptr, type, field) \
-	((char *)ptr - offsetof(type, field))
+	((type *)((char *)ptr - offsetof(type, field)))
 
 #endif

@@ -1,15 +1,17 @@
 #include "parse.h"
+#include <string.h>
+#include <stdio.h> /* sscanf */
 
-static op_entry *op_lookup(const op_entry *table, char const *start, const char *end)
+static op_entry const *op_lookup(op_entry const *table, char const *start, const char *end)
 {
 	op_entry const *op = table;
 
 	while (op->name && op->func) {
 		int len1 = strlen(op->name);
-		int len2 = end - start + 1;
+		int len2 = end - start;
 
 		if (len1 == len2 && !memcmp(start, op->name, len1)) {
-			return op->func;
+			return op;
 		}
 		++op;
 	}
@@ -44,14 +46,14 @@ static void plist_add_tail(plist_t *new, plist_t *head)
 	__plist_add(new, head->prev, head);
 }
 
-static void plist_push(plist_t *pl, item_t *it)
+void plist_push(plist_t *pl, item_t *it)
 {
-	plist_add_tail(pl, it->pl);
+	plist_add_tail(&it->pl, pl);
 }
 
 void plist_push_num(plist_t *pl, num_t num)
 {
-	item_t *it = xmalloc(sizeof(*i));
+	item_t *it = malloc(sizeof(*it));
 	memset(it, 0, sizeof(*it));
 
 	it->type = TT_NUM;
@@ -62,36 +64,73 @@ void plist_push_num(plist_t *pl, num_t num)
 
 void plist_push_op(plist_t *pl, const op_entry *op)
 {
-	item_t *it = xmalloc(sizeof(*i));
+	item_t *it = malloc(sizeof(*it));
 	memset(it, 0, sizeof(*it));
 
 	it->type = TT_OP;
-	it->op   = op;
+	it->op_e = op;
 
 	plist_push(pl, it);
 }
 
-int plist_push_raw(op_entry const *ops, plist_t *pl, char const *raw, char const *end)
+void plist_push_unk(plist_t *pl, char const *start, char const *end)
+{
+	item_t *it = malloc(sizeof(*it));
+	memset(it, 0, sizeof(*it));
+
+	it->type = TT_UNK;
+	size_t len = end - start;
+	it->raw  = malloc(len + 1);
+	memcpy(it->raw, start, len);
+	it->raw[len] = 0;
+
+	plist_push(pl, it);
+}
+
+void plist_push_raw(op_entry const *ops, plist_t *pl, char const *raw, char const *end)
+{
+	item_t *it = item_mk(ops, raw, end);
+	plist_push(pl, it);
+}
+
+void item_destroy(item_t *it)
+{
+	free(it->raw);
+	free(it);
+}
+
+item_t *item_mk(op_entry const *ops, char const *start, char const *end)
 {
 	// All num_ts are parameters; everything else is an operation.
 	num_t value;
-	int ret = sscanf(raw, "%"SCNnum, &value);
+
+	item_t *it = malloc(sizeof(*it));
+	memset(it, 0, sizeof(*it));
+
+	size_t len = end - start;
+	it->raw  = malloc(len + 1);
+	memcpy(it->raw, start, len);
+	it->raw[len] = 0;
+	it->raw_len = len;
+
+	int ret = sscanf(start, "%"SCNnum, &value);
 
 	if (ret == 1) {
-		plist_push_num(stack, value);
+		it->type = TT_NUM;
+		it->num  = value;
 	} else {
-		op_entry op = op_lookup(ops, raw, end);
+		op_entry const *op = op_lookup(ops, start, end);
 		if (!op) {
-			/* TODO: insert some thing indicating an unknown */
-			// plist_push_unk(pl, raw, end);
-			return -1;
+			/* insert some thing indicating an unknown */
+			it->type = TT_UNK;
 		} else {
-			/* TODO: push an op token */
-			plist_push_op(pl, op);
+			/* push an op token */
+			it->op_e = op;
+			it->type = TT_OP;
 		}
 	}
 
-	return 0;
+	return it;
 }
 
 static void __plist_remove(plist_t *prev, plist_t *next)
@@ -111,7 +150,7 @@ item_t *plist_pop(plist_t *pl)
 {
 	plist_t *cur = pl->next;
 
-	plist_remove(pl, cur);
+	plist_remove(cur);
 
 	item_t *it = container_of(cur, item_t, pl);
 	return it;
@@ -122,36 +161,47 @@ num_t plist_pop_num(plist_t *pl)
 	item_t *it = plist_pop(pl);
 
 	num_t n = it->num;
+	free(it->raw);
 	free(it);
 	return n;
 }
 
+int item_to_string(item_t *it, char *buf, size_t len)
+{
+	switch(it->type) {
+	case TT_OP:
+		return snprintf(buf, len, "TT_OP %s", it->op_e->name);
+
+	case TT_NUM:
+		return snprintf(buf, len, "TT_NUM %"PRInum, it->num);
+	case TT_DOC:
+		return snprintf(buf, len, "TT_DOC %s", it->op_e->name);
+
+	case TT_UNK:
+		return snprintf(buf, len, "TT_UNK %s", it->raw);
+	default:
+		return snprintf(buf, len, "Invalid type %d", it->type);
+
+	}
+}
 
 /*
  * Tokenizer
  */
 error_t tokpath(op_entry const *ops, plist_t *pl, char const *path)
 {
-	size_t const  len = strlen(path);
-	char   const *end = path + len - 1;
-	char   const *last_slash = end + 1;
-
 	char const *p;
-	for (p = end; p >= path; --p) {
-		// Decide when to start a new token.
-		char const *start;
-		if (p == path) {
-			start = p;
-		} else if (*p == '/') {
-			start = p + 1;
-		} else {
+	char const *tok_start = path;
+	for (p = path;; p++) {
+		if (*p != '/' && *p != '\0')
 			continue;
-		}
 
-		plist_push_raw(ops, pl, start, last_slash);
-		last_slash = start;
+		plist_push_raw(ops, pl, tok_start, p);
+		tok_start = p + 1;
 
-		end = p - 1;
+		if (*p == '\0')
+			break;
 	}
+
 	return 0;
 }

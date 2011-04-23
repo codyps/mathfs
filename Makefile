@@ -1,5 +1,5 @@
 OBJ = 
-BIN = mathfs tokenizer
+BIN = mathfs tokenizer test_parse
 
 .PHONY: all
 all: build
@@ -7,10 +7,12 @@ all: build
 mathfs: fs.c.o
 tokenizer: stack_eval.c.o tokenizer.c.o error.c.o
 
+test_parse: error.c.o parse.c.o test_parse.c.o
+
 CC = gcc
 RM = rm -f
 
-CFLAGS = -ggdb -O2
+CFLAGS = -ggdb
 override CFLAGS += -Wall -pipe -MMD
 FUSE_FLAGS := $(shell pkg-config fuse --cflags --libs)
 

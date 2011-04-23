@@ -3,4 +3,5 @@
 *.d
 mathfs
 tokenizer
+test_parse
 
