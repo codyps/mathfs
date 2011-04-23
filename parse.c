@@ -196,8 +196,10 @@ error_t tokpath(op_entry const *ops, plist_t *pl, char const *path)
 		if (*p != '/' && *p != '\0')
 			continue;
 
-		plist_push_raw(ops, pl, tok_start, p);
-		tok_start = p + 1;
+		if (tok_start < p) {
+			plist_push_raw(ops, pl, tok_start, p);
+			tok_start = p + 1;
+		}
 
 		if (*p == '\0')
 			break;
