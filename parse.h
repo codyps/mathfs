@@ -16,8 +16,11 @@ enum token_type {
 	TT_UNK
 };
 
-#define list_for_each_prev(pos, head) \
+#define plist_for_each_prev(pos, head) \
 	for (pos = (head)->prev; pos != (head); pos = pos->prev)
+
+#define plist_for_each(pos, head) \
+	for (pos = (head)->next; pos != (head); pos = pos->next)
 
 typedef struct plist_s {
 	struct plist_s *prev, *next;

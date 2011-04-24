@@ -179,50 +179,39 @@ int item_to_string(item_t *it, char *buf, size_t len)
 {
 	switch(it->type) {
 	case TT_OP:
-		return snprintf(buf, len, "TT_OP %s", it->op_e->name);
+		return snprintf(buf, len, "%s", it->op_e->name);
 
 	case TT_NUM:
-		return snprintf(buf, len, "TT_NUM %"PRInum, it->num);
+		return snprintf(buf, len, "%"PRInum, it->num);
 
 	case TT_UNK:
-		return snprintf(buf, len, "TT_UNK %s", it->raw);
+		return snprintf(buf, len, "%s", it->raw);
 
 	default:
-		return snprintf(buf, len, "Invalid type %d", it->type);
+		return snprintf(buf, len, "invalid type %d", it->type);
 
 	}
 }
 
 int plist_to_string(plist_t *pl, char *buf, size_t len)
 {
-	int extra = 0;
+	int consumed = 0;
 
-	while (!plist_is_empty(pl)) {
-		item_t *it = plist_pop(pl);
+	plist_t *pos;
+	plist_for_each(pos, pl) {
+		item_t *it = item_entry(pos);
 		int n;
 
-		if (it->type == TT_NUM) {
-			n = snprintf(buf, len, "%"PRInum"\n", it->num);
-		} else {
-			n = snprintf(buf, len, "%s\n", it->raw);
-		}
-		item_destroy(it);
+		n = item_to_string(it, buf + n, len);
 
-		/* internal error in snprintf() */
 		if (n < 0) {
 			break;
 		}
-		/* printed with memory to spare */
-		else if (!extra && 0 <= n && n < len) {
-			buf += n;
-			len -= n;
-		}
-		/* out of memory */
-		else {
-			extra += n;
-		}
+
+		consumed += n;
 	}
-	return extra;
+
+	return consumed;
 }
 
 /*
