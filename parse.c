@@ -193,12 +193,36 @@ int item_to_string(item_t *it, char *buf, size_t len)
 	}
 }
 
-int plist_to_string(plist_t *head, char *buf, size_t len)
+int plist_to_string(plist_t *pl, char *buf, size_t len)
 {
-	/* TODO: write a representation of the plist to buf of length len.
-	 * if len is too short, return the number of bytes which would have
-	 * been written to buf if it were longer */
-	return 0;
+	int extra = 0;
+
+	while (!plist_is_empty(pl)) {
+		item_t *it = plist_pop(pl);
+		int n;
+
+		if (it->type == TT_NUM) {
+			n = snprintf(buf, len, "%"PRInum"\n", it->num);
+		} else {
+			n = snprintf(buf, len, "%s\n", it->raw);
+		}
+		item_destroy(it);
+
+		/* internal error in snprintf() */
+		if (n < 0) {
+			break;
+		}
+		/* printed with memory to spare */
+		else if (!extra && 0 <= n && n < len) {
+			buf += n;
+			len -= n;
+		}
+		/* out of memory */
+		else {
+			extra += n;
+		}
+	}
+	return extra;
 }
 
 /*
