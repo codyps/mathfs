@@ -156,8 +156,7 @@ num_t plist_pop_num(plist_t *pl)
 	item_t *it = plist_pop(pl);
 
 	num_t n = it->num;
-	free(it->raw);
-	free(it);
+	item_destroy(it);
 	return n;
 }
 
