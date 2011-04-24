@@ -36,11 +36,6 @@ static void __plist_add(plist_t *new, plist_t *prev, plist_t *next)
 	prev->next = new;
 }
 
-static void plist_add(plist_t *new, plist_t *head)
-{
-	__plist_add(new, head, head->next);
-}
-
 static void plist_add_tail(plist_t *new, plist_t *head)
 {
 	__plist_add(new, head->prev, head);

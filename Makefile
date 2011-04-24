@@ -17,7 +17,6 @@ CFLAGS = -ggdb
 override CFLAGS += -Wall -pipe -MMD
 FUSE_FLAGS := $(shell pkg-config fuse --cflags --libs)
 
-
 .PHONY: build
 build: $(BIN)
 
