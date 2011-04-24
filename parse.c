@@ -160,9 +160,8 @@ error_t plist_pop_num(plist_t *pl, plist_t *head, num_t *num)
 
 	item_t *it = plist_pop(pl);
 
-	*num = it->num;
-
 	if (it->type == TT_NUM) {
+		*num = it->num;
 		item_destroy(it);
 		return ERR_NONE;
 	} else {
