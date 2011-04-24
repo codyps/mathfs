@@ -46,10 +46,8 @@ op_entry ops [] = {
 static int m_getattr(const char *path, struct stat *stbuf)
 {
 	memset(stbuf, 0, sizeof(*stbuf));
-	if (!strcmp(path, "/")) {
-		stbuf->st_mode  = S_IFDIR | 0755;
-		stbuf->st_nlink = 2;
-	}
+	stbuf->st_mode  = S_IFDIR | 0755;
+	stbuf->st_nlink = 2;
 
 	return 0;
 }
@@ -64,7 +62,6 @@ static int m_readdir(const char *path, void *buf,
 
 	filler(buf, ".", &stbuf, off);
 	filler(buf, "..", &stbuf, off);
-
 
 	if (!strcmp(path, "/")) {
 		/* root dir is special, shows all functions */
