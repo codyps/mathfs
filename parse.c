@@ -175,7 +175,7 @@ void plist_destroy(plist_t *head)
 	/* TODO: free all items (not head, it isn't in an item) */
 }
 
-int item_to_string(item_t *it, char *buf, size_t len)
+int item_to_string(item_t const *it, char *buf, size_t len)
 {
 	switch(it->type) {
 	case TT_OP:
@@ -193,7 +193,7 @@ int item_to_string(item_t *it, char *buf, size_t len)
 	}
 }
 
-int plist_to_string(plist_t *pl, char *buf, size_t len)
+int plist_to_string(plist_t const *pl, char *buf, size_t len)
 {
 	int consumed = 0;
 

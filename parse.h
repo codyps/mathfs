@@ -64,8 +64,8 @@ void    plist_push_raw(op_entry const *ops, plist_t *pl, char const *raw, char c
 item_t *item_mk(op_entry const *ops, char const *raw, char const *end);
 void    item_destroy(item_t *it);
 
-int item_to_string(item_t *it, char *buf, size_t len);
-int plist_to_string(plist_t *pl, char *buf, size_t len);
+int item_to_string(item_t const *it, char *buf, size_t len);
+int plist_to_string(plist_t const *pl, char *buf, size_t len);
 
 void plist_init(plist_t *pl);
 bool plist_is_empty(plist_t *pl);
