@@ -58,7 +58,7 @@ int main(int argc, char **argv)
 	if (err) goto done;
 
 	char buf[100];
-	int extra = plist_to_string(&pd, buf, sizeof buf);
+	int extra = plist_to_string(&pd, buf, sizeof(buf));
 	printf("%s\n", buf);
 
 	// Whatever is left on the stack is the output.

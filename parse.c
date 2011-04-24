@@ -202,7 +202,8 @@ int plist_to_string(plist_t const *pl, char *buf, size_t len)
 	plist_t *pos;
 	plist_for_each(pos, pl) {
 		item_t *it = item_entry(pos);
-		int n = item_to_string(it, buf + n, MIN(len - n, 0));
+		int n = item_to_string(it, buf + consumed,
+				MIN(len - consumed, 0));
 
 		if (n < 0) {
 			return n;
@@ -211,7 +212,7 @@ int plist_to_string(plist_t const *pl, char *buf, size_t len)
 		consumed += n;
 	}
 
-	return consumed;
+	return consumed + 1;
 }
 
 /*
