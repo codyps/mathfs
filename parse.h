@@ -32,6 +32,8 @@ typedef struct {
 } op_entry;
 
 
+#define OP(name, doc, func) { name, doc, func }
+
 typedef struct item_s {
 	enum token_type type;
 
@@ -59,11 +61,15 @@ void plist_push_unk(plist_t *pl, char const *start, char const *end);
 void    plist_push_raw(op_entry const *ops, plist_t *pl, char const *raw, char const *end);
 item_t *item_mk(op_entry const *ops, char const *raw, char const *end);
 void    item_destroy(item_t *it);
+
 int item_to_string(item_t *it, char *buf, size_t len);
+int plist_to_string(plist_t *pl, char *buf, size_t len);
 
 void plist_init(plist_t *pl);
 bool plist_is_empty(plist_t *pl);
+void plist_destroy(plist_t *pl);
 
+#define item_entry(ptr) container_of(ptr, item_t, pl)
 #define container_of(ptr, type, field) \
 	((type *)((char *)ptr - offsetof(type, field)))
 

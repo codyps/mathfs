@@ -166,6 +166,11 @@ num_t plist_pop_num(plist_t *pl)
 	return n;
 }
 
+void plist_destroy(plist_t *head)
+{
+	/* TODO: free all items (not head, it isn't in an item) */
+}
+
 int item_to_string(item_t *it, char *buf, size_t len)
 {
 	switch(it->type) {
@@ -183,6 +188,14 @@ int item_to_string(item_t *it, char *buf, size_t len)
 		return snprintf(buf, len, "Invalid type %d", it->type);
 
 	}
+}
+
+int plist_to_string(plist_t *head, char *buf, size_t len)
+{
+	/* TODO: write a representation of the plist to buf of length len.
+	 * if len is too short, return the number of bytes which would have
+	 * been written to buf if it were longer */
+	return 0;
 }
 
 /*

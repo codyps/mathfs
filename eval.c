@@ -2,7 +2,7 @@
 #include "error.h"
 
 
-error_t condense_plist(plist_t *pl)
+void eval(plist_t *pl)
 {
 	plist_t *pos;
 	list_for_each_prev(pos, pl) {
