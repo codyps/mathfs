@@ -161,11 +161,12 @@ error_t plist_pop_num(plist_t *pl, plist_t *head, num_t *num)
 	item_t *it = plist_pop(pl);
 
 	*num = it->num;
-	item_destroy(it);
 
 	if (it->type == TT_NUM) {
+		item_destroy(it);
 		return ERR_NONE;
 	} else {
+		item_destroy(it);
 		return ERR_NOT_INT;
 	}
 }
