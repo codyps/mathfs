@@ -194,36 +194,35 @@ int item_to_string(item_t *it, char *buf, size_t len)
 	}
 }
 
-int plist_to_string(plist_t *pl, char *buf, size_t len)
+int plist_to_string(plist_t *head, char *buf, size_t len)
 {
-	int extra = 0;
+	plist_t *ptr;
+	int used  = 1;
+	int total = 1;
 
-	while (!plist_is_empty(pl)) {
-		item_t *it = plist_pop(pl);
+	for (ptr = head->next; ptr != head; ptr = ptr->next) {
+		item_t const *item = item_entry(ptr);
 		int n;
 
-		if (it->type == TT_NUM) {
-			n = snprintf(buf, len, "%"PRInum"\n", it->num);
+		if (item->type == TT_NUM) {
+			n = snprintf(buf, len, "%"PRInum"\n", item->num);
 		} else {
-			n = snprintf(buf, len, "%s\n", it->raw);
+			n = snprintf(buf, len, "%s\n", item->raw);
 		}
-		item_destroy(it);
 
 		/* internal error in snprintf() */
 		if (n < 0) {
 			break;
 		}
 		/* printed with memory to spare */
-		else if (!extra && 0 <= n && n < len) {
-			buf += n;
-			len -= n;
+		else if (used == total && 0 <= n && n < len) {
+			buf  += n;
+			len  -= n;
+			used += n;
 		}
-		/* out of memory */
-		else {
-			extra += n;
-		}
+		total += n;
 	}
-	return extra;
+	return total;
 }
 
 /*
