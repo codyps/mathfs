@@ -106,7 +106,10 @@ static int m_open(const char *path, struct fuse_file_info *fi)
 	if (r)
 		return -1;
 
-	eval(&pl);
+	error_t e = eval(&pl);
+	if (e) {
+		/* IDK */
+	}
 
 	int len = plist_to_string(&pl, NULL, 0);
 
