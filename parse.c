@@ -196,8 +196,8 @@ int item_to_string(item_t *it, char *buf, size_t len)
 int plist_to_string(plist_t *head, char *buf, size_t len)
 {
 	plist_t *ptr;
-	int used  = 1;
-	int total = 1;
+	int used  = 0;
+	int total = 0;
 
 	for (ptr = head->next; ptr != head; ptr = ptr->next) {
 		item_t *item = item_entry(ptr);
