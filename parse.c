@@ -180,17 +180,16 @@ int item_to_string(item_t *it, char *buf, size_t len)
 {
 	switch(it->type) {
 	case TT_OP:
-		return snprintf(buf, len, "TT_OP %s", it->op_e->name);
+		return snprintf(buf, len, "%s\n", it->op_e->name);
 
 	case TT_NUM:
-		return snprintf(buf, len, "TT_NUM %"PRInum, it->num);
+		return snprintf(buf, len, "%"PRInum"\n", it->num);
 
 	case TT_UNK:
-		return snprintf(buf, len, "TT_UNK %s", it->raw);
+		return snprintf(buf, len, "%s\n", it->raw);
 
 	default:
-		return snprintf(buf, len, "Invalid type %d", it->type);
-
+		return snprintf(buf, len, "%d\n", it->type);
 	}
 }
 
@@ -201,21 +200,12 @@ int plist_to_string(plist_t *head, char *buf, size_t len)
 	int total = 1;
 
 	for (ptr = head->next; ptr != head; ptr = ptr->next) {
-		item_t const *item = item_entry(ptr);
-		int n;
+		item_t *item = item_entry(ptr);
+		int n = item_to_string(item, buf, len);
 
-		if (item->type == TT_NUM) {
-			n = snprintf(buf, len, "%"PRInum"\n", item->num);
-		} else {
-			n = snprintf(buf, len, "%s\n", item->raw);
-		}
-
-		/* internal error in snprintf() */
 		if (n < 0) {
 			break;
-		}
-		/* printed with memory to spare */
-		else if (used == total && 0 <= n && n < len) {
+		} else if (used == total && 0 <= n && n < len) {
 			buf  += n;
 			len  -= n;
 			used += n;
