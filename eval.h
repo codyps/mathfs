@@ -4,6 +4,6 @@
 #include "parse.h"
 #include "error.h"
 
-void eval(plist_t *pl);
+error_t eval(plist_t *pl);
 
 #endif

@@ -156,14 +156,23 @@ item_t *plist_pop(plist_t *pl)
 	return it;
 }
 
-num_t plist_pop_num(plist_t *pl)
+error_t plist_pop_num(plist_t *pl, plist_t *head, num_t *num)
 {
+	/* no arguments in front of pl to pop */
+	if (pl->next == head) {
+		return ERR_TOO_FEW;
+	}
+
 	item_t *it = plist_pop(pl);
 
-	num_t n = it->num;
-	free(it->raw);
-	free(it);
-	return n;
+	if (it->type == TT_NUM) {
+		*num = it->num;
+		free(it->raw);
+		free(it);
+		return ERR_NONE;
+	} else {
+		return ERR_NOT_INT;
+	}
 }
 
 void plist_destroy(plist_t *head)
@@ -179,11 +188,10 @@ int item_to_string(item_t *it, char *buf, size_t len)
 
 	case TT_NUM:
 		return snprintf(buf, len, "TT_NUM %"PRInum, it->num);
-	case TT_DOC:
-		return snprintf(buf, len, "TT_DOC %s", it->op_e->name);
 
 	case TT_UNK:
 		return snprintf(buf, len, "TT_UNK %s", it->raw);
+
 	default:
 		return snprintf(buf, len, "Invalid type %d", it->type);
 
