@@ -179,13 +179,13 @@ int item_to_string(item_t const *it, char *buf, size_t len)
 {
 	switch(it->type) {
 	case TT_OP:
-		return snprintf(buf, len, "%s", it->op_e->name);
+		return snprintf(buf, len, "%s\n", it->op_e->name);
 
 	case TT_NUM:
-		return snprintf(buf, len, "%"PRInum, it->num);
+		return snprintf(buf, len, "%"PRInum"\n", it->num);
 
 	case TT_UNK:
-		return snprintf(buf, len, "%s", it->raw);
+		return snprintf(buf, len, "%s\n", it->raw);
 
 	default:
 		return -1;
@@ -212,7 +212,7 @@ int plist_to_string(plist_t const *pl, char *buf, size_t len)
 		consumed += n;
 	}
 
-	return consumed + 1;
+	return consumed;
 }
 
 /*

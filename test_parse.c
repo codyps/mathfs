@@ -57,21 +57,12 @@ int main(int argc, char **argv)
 	err = eval(&pd);
 	if (err) goto done;
 
-	char buf[100];
+	char buf[2048];
 	int extra = plist_to_string(&pd, buf, sizeof(buf));
-	printf("%s\n", buf);
-
-	// Whatever is left on the stack is the output.
-	while (!plist_is_empty(&pd)) {
-		item_t *it = plist_pop(&pd);
-
-		char buf[2048];
-		item_to_string(it, buf, sizeof(buf));
-		printf("%s\n", buf);
-	}
+	printf("%s", buf);
 
 done:
-	if (err) {
+	if (extra < 0) {
 		fprintf(stderr, "err: %s\n", error_msg(err));
 	}
 	return err;

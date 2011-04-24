@@ -113,7 +113,7 @@ static int m_open(const char *path, struct fuse_file_info *fi)
 
 	int len = plist_to_string(&pl, NULL, 0);
 
-	struct math_fc *fc = malloc(sizeof(*fc) + len);
+	struct math_fc *fc = malloc(sizeof(*fc) + len + 1 /* '\0' */);
 	fc->len = len;
 
 	plist_to_string(&pl, fc->data, len);
