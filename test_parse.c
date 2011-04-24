@@ -59,11 +59,7 @@ int main(int argc, char **argv)
 
 	char buf[100];
 	int extra = plist_to_string(&pd, buf, sizeof buf);
-	if (extra) {
-		fprintf(stderr, "war: truncated last %d bytes\n", extra);
-	} else {
-		printf("%s\n", buf);
-	}
+	printf("%s\n", buf);
 
 	// Whatever is left on the stack is the output.
 	while (!plist_is_empty(&pd)) {
