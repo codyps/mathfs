@@ -193,7 +193,7 @@ int item_to_string(item_t const *it, char *buf, size_t len)
 	}
 }
 
-#define MIN(x,y) ((x) < (y)?(x):(y))
+#define MAX(x,y) ((x) > (y)?(x):(y))
 
 int plist_to_string(plist_t const *pl, char *buf, size_t len)
 {
@@ -203,7 +203,7 @@ int plist_to_string(plist_t const *pl, char *buf, size_t len)
 	plist_for_each(pos, pl) {
 		item_t *it = item_entry(pos);
 		int n = item_to_string(it, buf + consumed,
-				MIN(len - consumed, 0));
+				MAX(len - consumed, 0));
 
 		if (n < 0) {
 			return n;
