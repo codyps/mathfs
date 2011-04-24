@@ -8,7 +8,7 @@ mathfs: fs.c.o error.c.o parse.c.o eval.c.o
 
 tokenizer: stack_eval.c.o tokenizer.c.o error.c.o
 
-test_parse: error.c.o parse.c.o test_parse.c.o
+test_parse: error.c.o parse.c.o eval.c.o test_parse.c.o
 
 CC = gcc
 RM = rm -f
