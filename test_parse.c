@@ -58,12 +58,9 @@ int main(int argc, char **argv)
 	if (err) goto done;
 
 	char buf[100];
-	int extra = plist_to_string(&pd, buf, sizeof buf);
-	if (extra) {
-		fprintf(stderr, "war: truncated last %d bytes\n", extra);
-	} else {
-		printf("%s\n", buf);
-	}
+	int used = plist_to_string(&pd, buf, sizeof buf);
+	printf(">>> need %d bytes; given %d\n", used, sizeof buf);
+	printf("%s\n", buf);
 
 done:
 	if (err) {
