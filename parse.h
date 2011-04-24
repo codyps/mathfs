@@ -13,7 +13,6 @@ typedef double num_t;
 enum token_type {
 	TT_OP,
 	TT_NUM,
-	TT_DOC,
 	TT_UNK
 };
 
@@ -24,7 +23,7 @@ typedef struct plist_s {
 	struct plist_s *prev, *next;
 } plist_t;
 
-typedef error_t (op_fn)(plist_t *);
+typedef error_t (op_fn)(plist_t *pl, plist_t *head);
 typedef struct {
 	char const *name;
 	char const *doc;
@@ -50,7 +49,7 @@ typedef struct item_s {
 
 error_t tokpath(op_entry const *ops, plist_t *pl, char const *path);
 
-num_t plist_pop_num(plist_t *pl);
+error_t plist_pop_num(plist_t *pl, plist_t *head, num_t *num);
 item_t *plist_pop(plist_t *pl);
 
 void plist_push(plist_t *pl, item_t *it);

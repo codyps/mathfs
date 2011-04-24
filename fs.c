@@ -9,29 +9,29 @@
 #include "parse.h"
 #include "eval.h"
 
-static error_t add(plist_t *pl)
+static error_t add(plist_t *pl, plist_t *head)
 {
-	if (plist_is_empty(pl))
-		return ERR_TOO_FEW;
-	num_t x = plist_pop_num(pl);
+	num_t x, y;
+	error_t err;
 
-	if (plist_is_empty(pl))
-		return ERR_TOO_FEW;
-	num_t y = plist_pop_num(pl);
+	err = plist_pop_num(pl, head, &x);
+	if (err) return err;
+	err = plist_pop_num(pl, head, &y);
+	if (err) return err;
 
 	plist_push_num(pl, x + y);
 	return 0;
 }
 
-static error_t sub(plist_t *pl)
+static error_t sub(plist_t *pl, plist_t *head)
 {
-	if (plist_is_empty(pl))
-		return ERR_TOO_FEW;
-	num_t x = plist_pop_num(pl);
+	num_t x, y;
+	error_t err;
 
-	if (plist_is_empty(pl))
-		return ERR_TOO_FEW;
-	num_t y = plist_pop_num(pl);
+	err = plist_pop_num(pl, head, &x);
+	if (err) return err;
+	err = plist_pop_num(pl, head, &y);
+	if (err) return err;
 
 	plist_push_num(pl, x - y);
 	return 0;

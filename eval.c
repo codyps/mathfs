@@ -1,13 +1,32 @@
 #include "eval.h"
 #include "error.h"
 
+#include <stdio.h>
 
-void eval(plist_t *pl)
+error_t eval(plist_t *head)
 {
-	plist_t *pos;
-	list_for_each_prev(pos, pl) {
-	
-	}
+	plist_t *ptr = head->prev;
+	error_t  err = ERR_NONE;
 
-	return 0;
+	while (ptr != head && err == ERR_NONE) {
+		item_t *item = item_entry(ptr);
+
+		switch (item->type) {
+		case TT_OP:
+			err = item->op_e->func(ptr, head);
+			ptr = ptr->prev;
+			plist_pop(ptr);
+			item_destroy(item);
+			break;
+
+		case TT_NUM:
+			ptr = ptr->prev;
+			break;
+
+		case TT_UNK:
+			err = ERR_UNDEF_OP;
+			break;
+		}
+	}
+	return err;
 }
