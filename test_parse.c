@@ -65,15 +65,6 @@ int main(int argc, char **argv)
 		printf("%s\n", buf);
 	}
 
-	// Whatever is left on the stack is the output.
-	while (!plist_is_empty(&pd)) {
-		item_t *it = plist_pop(&pd);
-
-		char buf[2048];
-		item_to_string(it, buf, sizeof(buf));
-		printf("%s\n", buf);
-	}
-
 done:
 	if (err) {
 		fprintf(stderr, "err: %s\n", error_msg(err));
