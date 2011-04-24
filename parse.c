@@ -188,7 +188,7 @@ int item_to_string(item_t const *it, char *buf, size_t len)
 		return snprintf(buf, len, "%s", it->raw);
 
 	default:
-		return snprintf(buf, len, "invalid type %d", it->type);
+		return -1;
 
 	}
 }
@@ -200,12 +200,10 @@ int plist_to_string(plist_t const *pl, char *buf, size_t len)
 	plist_t *pos;
 	plist_for_each(pos, pl) {
 		item_t *it = item_entry(pos);
-		int n;
-
-		n = item_to_string(it, buf + n, len);
+		int n = item_to_string(it, buf + n, len);
 
 		if (n < 0) {
-			break;
+			return n;
 		}
 
 		consumed += n;
