@@ -15,7 +15,7 @@ error_t eval(plist_t *head)
 		case TT_OP:
 			err = item->op_e->func(ptr, head);
 			ptr = ptr->prev;
-			plist_pop(ptr); // FIXME: memory leak
+			plist_pop(ptr);
 			item_destroy(item);
 			break;
 
