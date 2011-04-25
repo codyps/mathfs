@@ -51,7 +51,7 @@ static error_t doc(plist_t *pl, plist_t *head)
 }
 #endif
 
-op_entry ops [] = {
+static op_entry ops [] = {
 	OP("add", "addition, anyone?" , add),
 	OP("sub", "well, it subtracts", sub),
 #if 0

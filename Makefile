@@ -1,12 +1,10 @@
 OBJ = 
-BIN = mathfs tokenizer test_parse
+BIN = mathfs test_parse
 
 .PHONY: all
 all: build
 
 mathfs: fs.c.o error.c.o parse.c.o eval.c.o
-
-tokenizer: stack_eval.c.o tokenizer.c.o error.c.o
 
 test_parse: error.c.o parse.c.o eval.c.o test_parse.c.o
 
