@@ -9,6 +9,9 @@
 #include "parse.h"
 #include "eval.h"
 
+/* debug only */
+#include <stdio.h>
+
 static error_t add(plist_t *pl, plist_t *head)
 {
 	num_t x, y;
@@ -46,8 +49,32 @@ op_entry ops [] = {
 static int m_getattr(const char *path, struct stat *stbuf)
 {
 	memset(stbuf, 0, sizeof(*stbuf));
+//	stbuf->st_mode  = S_IFREG | S_IFDIR | 0755;
 	stbuf->st_mode  = S_IFDIR | 0755;
 	stbuf->st_nlink = 2;
+	stbuf->st_size  = 4096;
+	stbuf->st_blksize = stbuf->st_size;
+	stbuf->st_blocks = stbuf->st_size / 512;
+
+	fprintf(stderr, "path: %s\n", path);
+#if 0
+	plist_t pl;
+	plist_init(&pl);
+
+	error_t e = tokpath(ops, &pl, path);
+	if (e)
+		return -1;
+
+	e = eval(pl);
+
+	plist_destroy(&pl);
+
+	if (e) {
+		stbuf->stmode = S_IFDIR | 0755;
+	} else {
+		stbuf->stmode = 0755;
+	}
+#endif
 
 	return 0;
 }
@@ -78,7 +105,8 @@ static int m_readdir(const char *path, void *buf,
 			return -1;
 
 		/* Check if last element in path is in the op table */
-		if (!plist_is_empty(&pl) && item_entry(pl.prev)->type == TT_OP) {
+		if (!plist_is_empty(&pl)
+				&& item_entry(pl.prev)->type == TT_OP) {
 			/* last element is a function, show doc file */
 			filler(buf, "doc", &stbuf, off);
 		}

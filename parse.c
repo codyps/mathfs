@@ -172,7 +172,13 @@ error_t plist_pop_num(plist_t *pl, plist_t *head, num_t *num)
 
 void plist_destroy(plist_t *head)
 {
-	/* TODO: free all items (not head, it isn't in an item) */
+	/* free all items (not head, it isn't in an item) */
+	plist_t *pos;
+
+	plist_for_each(pos, head) {
+		item_t *it = item_entry(pos);
+		item_destroy(it);
+	}
 }
 
 int item_to_string(item_t const *it, char *buf, size_t len)
