@@ -15,7 +15,8 @@ RM = rm -f
 
 CFLAGS = -ggdb
 override CFLAGS += -Wall -pipe -MMD
-FUSE_FLAGS := $(shell pkg-config fuse --cflags --libs)
+FUSE_CFLAGS  := $(shell pkg-config fuse --cflags)
+FUSE_LDFLAGS := $(shell pkg-config fuse --libs)
 
 .PHONY: build
 build: $(BIN)
@@ -29,10 +30,10 @@ clean:
 	$(RM) $(BIN) $(BIN)-g*.tar *.d *.o $(OBJ)
 
 %.c.o : %.c
-	$(CC) $(CFLAGS) $(FUSE_FLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) $(FUSE_CFLAGS) -c -o $@ $<
 
 $(BIN): $(OBJ)
-	$(CC) $(CFLAGS) $(FUSE_FLAGS) -o $@ $^
+	$(CC) $(CFLAGS) $(FUSE_LDFLAGS) -o $@ $^
 
 .PHONY: archive
 VER:=$(shell git rev-parse --verify --short HEAD 2>/dev/null)

@@ -174,9 +174,14 @@ void plist_destroy(plist_t *head)
 {
 	/* free all items (not head, it isn't in an item) */
 	plist_t *pos;
-
+	plist_t tmp;
 	plist_for_each(pos, head) {
 		item_t *it = item_entry(pos);
+
+		/* this prevents a use after free */
+		tmp = it->pl;
+		pos = &tmp;
+
 		item_destroy(it);
 	}
 }
@@ -193,6 +198,11 @@ int item_to_string(item_t const *it, char *buf, size_t len)
 	case TT_UNK:
 		return snprintf(buf, len, "%s\n", it->raw);
 
+#if 0
+	case TT_DOC:
+		return snprintf(buf, len, "%s\n", it->op_e->doc);
+#endif
+
 	default:
 		return -1;
 
@@ -201,15 +211,16 @@ int item_to_string(item_t const *it, char *buf, size_t len)
 
 #define MAX(x,y) ((x) > (y)?(x):(y))
 
-int plist_to_string(plist_t const *pl, char *buf, size_t len)
+int plist_to_string(plist_t const *head, char *buf, size_t len)
 {
 	int consumed = 0;
 
 	plist_t *pos;
-	plist_for_each(pos, pl) {
+	plist_for_each(pos, head) {
 		item_t *it = item_entry(pos);
-		int n = item_to_string(it, buf + consumed,
-				MAX(len - consumed, 0));
+
+		size_t l = MAX((ssize_t)len - consumed, 0);
+		int n = item_to_string(it, buf + consumed, l);
 
 		if (n < 0) {
 			return n;

@@ -40,67 +40,148 @@ static error_t sub(plist_t *pl, plist_t *head)
 	return 0;
 }
 
+
+#if 0
+static error_t doc(plist_t *pl, plist_t *head)
+{
+	/* consume all the elements upward. If the directly previous one is
+	 * not a TT_OP, error. If there is another doc before this one, error.
+	 * If there is anything left following consuming upward, error.
+	 */
+}
+#endif
+
 op_entry ops [] = {
 	OP("add", "addition, anyone?" , add),
 	OP("sub", "well, it subtracts", sub),
+#if 0
+	OP("doc", NULL, doc),
+#endif
 	{}
 };
 
+
+enum path_type {
+	PT_ROOT,
+	PT_NORMAL,
+	PT_DOC,
+	PT_UNK
+};
+
+static enum path_type path_type(plist_t *head)
+{
+	enum path_type type = PT_DOC;
+
+	/* no items */
+	if (plist_is_empty(head))
+		return PT_ROOT;
+
+	plist_t *pos;
+
+	/* last item is not "doc" */
+	if (strcmp(item_entry(head->prev)->raw, "doc")) {
+		type = PT_NORMAL;
+		pos = head->prev;
+		goto upward_check;
+	}
+
+	/* only 1 item */
+	if (head->prev->prev == head) {
+		type = PT_NORMAL;
+		pos = head->prev;
+		goto upward_check;
+	}
+
+	/* function to get doc on */
+	item_t *fit = item_entry(head->prev->prev);
+	if (fit->type != TT_OP) {
+		type = PT_NORMAL;
+		pos = head->prev;
+		goto upward_check;
+	}
+
+	/* we need to skip over the TT_UNK("doc") */
+	pos = head->prev->prev;
+
+upward_check:
+	for (; pos != head; pos = pos->prev) {
+		if (item_entry(pos)->type == TT_UNK)
+			type = PT_UNK;
+	}
+
+	return type;
+}
+
 static int m_getattr(const char *path, struct stat *stbuf)
 {
+	plist_t pl;
+	plist_init(&pl);
+
+	error_t e = tokpath(ops, &pl, path + 1);
+	if (e)
+		return -1;
+
 	memset(stbuf, 0, sizeof(*stbuf));
-//	stbuf->st_mode  = S_IFREG | S_IFDIR | 0755;
-	stbuf->st_mode  = S_IFDIR | 0755;
-	stbuf->st_nlink = 2;
+
+	enum path_type pt = path_type(&pl);
+	switch(pt) {
+	case PT_NORMAL:
+		/* do some extra checking here to see if eval
+		 * succeeds. */
+		fprintf(stderr, "-- pt_normal\n");
+		if (eval(&pl)) {
+			/* fails, maybe we need more stuff?
+			 * Make it a dir. */
+			stbuf->st_mode  = S_IFDIR | 0755;
+		} else {
+			/* succeeds, file it is */
+			stbuf->st_mode = S_IFREG | 0644;
+		}
+		break;
+
+	case PT_ROOT:
+		fprintf(stderr, "-- pt_root\n");
+		stbuf->st_mode  = S_IFDIR | 0755;
+		break;
+
+	case PT_DOC:
+		fprintf(stderr, "-- pt_doc\n");
+		stbuf->st_mode = S_IFREG | 0644;
+		break;
+
+	case PT_UNK:
+		fprintf(stderr, "-- pt_unk\n");
+		plist_destroy(&pl);
+		return -1;
+
+	}
+
 	stbuf->st_size  = 4096;
 	stbuf->st_blksize = stbuf->st_size;
 	stbuf->st_blocks = stbuf->st_size / 512;
 
-	fprintf(stderr, "path: %s\n", path);
-#if 0
-	plist_t pl;
-	plist_init(&pl);
-
-	error_t e = tokpath(ops, &pl, path);
-	if (e)
-		return -1;
-
-	e = eval(pl);
-
 	plist_destroy(&pl);
-
-	if (e) {
-		stbuf->stmode = S_IFDIR | 0755;
-	} else {
-		stbuf->stmode = 0755;
-	}
-#endif
-
 	return 0;
 }
 
 static int m_readdir(const char *path, void *buf,
 		fuse_fill_dir_t filler, off_t off, struct fuse_file_info *fi)
 {
-	struct stat stbuf = {
-		.st_mode = S_IFDIR | 0755,
-		.st_nlink = 2
-	};
-
-	filler(buf, ".", &stbuf, off);
-	filler(buf, "..", &stbuf, off);
+	filler(buf, ".", NULL, 0);
+	filler(buf, "..",NULL, 0);
 
 	if (!strcmp(path, "/")) {
 		/* root dir is special, shows all functions */
 		op_entry *op;
 		for(op = ops; op->name; op++) {
-			filler(buf, op->name, &stbuf, off);
+			if (op->doc)
+				filler(buf, op->name, NULL, 0);
 		}
 	} else {
 
 		plist_t pl;
 		plist_init(&pl);
-		error_t r = tokpath(ops, &pl, path);
+		error_t r = tokpath(ops, &pl, path + 1);
 		if (r)
 			return -1;
 
@@ -108,7 +189,7 @@ static int m_readdir(const char *path, void *buf,
 		if (!plist_is_empty(&pl)
 				&& item_entry(pl.prev)->type == TT_OP) {
 			/* last element is a function, show doc file */
-			filler(buf, "doc", &stbuf, off);
+			filler(buf, "doc", NULL, 0);
 		}
 
 		plist_destroy(&pl);
@@ -130,23 +211,53 @@ static int m_open(const char *path, struct fuse_file_info *fi)
 
 	plist_t pl;
 	plist_init(&pl);
-	error_t r = tokpath(ops, &pl, path);
+	error_t r = tokpath(ops, &pl, path + 1);
 	if (r)
 		return -1;
 
-	error_t e = eval(&pl);
-	if (e) {
-		/* IDK */
+	enum path_type pt = path_type(&pl);
+
+	switch(pt) {
+	case PT_NORMAL: {
+		error_t e = eval(&pl);
+		if (e) {
+			/* IDK */
+			return -1;
+		}
+
+		int len = plist_to_string(&pl, NULL, 0);
+
+		struct math_fc *fc = malloc(sizeof(*fc) + len);
+		fc->len = len;
+
+		plist_to_string(&pl, fc->data, len);
+
+		fi->fh = (intptr_t) fc;
+		break;
 	}
 
-	int len = plist_to_string(&pl, NULL, 0);
+	case PT_DOC: {
+		item_t *op = item_entry(pl.prev->prev);
+		int len = strlen(op->op_e->doc);
 
-	struct math_fc *fc = malloc(sizeof(*fc) + len + 1 /* '\0' */);
-	fc->len = len;
+		struct math_fc *fc = malloc(sizeof(*fc) + len + 1);
+		fc->len = len + 1;
 
-	plist_to_string(&pl, fc->data, len);
+		memcpy(fc->data, op->op_e->doc, len);
+		fc->data[len] = '\n';
 
-	fi->fh = (intptr_t) fc;
+		fi->fh = (intptr_t) fc;
+		break;
+	}
+
+	case PT_UNK:
+	case PT_ROOT:
+	default:
+		/* shouldn't happen */
+		return -1;
+
+	}
+
 
 	plist_destroy(&pl);
 
