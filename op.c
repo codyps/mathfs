@@ -116,7 +116,7 @@ static error_t fs_exp(plist_t *pl, plist_t *head)
 	return 0;
 }
 
-op_entry ops [] = {
+const op_entry ops [] = {
 #ifndef NUM_FLOAT
 	OP("factor", "computes the prime factors of a number", &fs_factor),
 #endif

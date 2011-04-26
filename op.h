@@ -7,6 +7,6 @@
 #define OP(name, doc, func) { name, doc, func }
 #define OP_END()
 
-extern op_entry ops[];
+const extern op_entry ops[];
 
 #endif

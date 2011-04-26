@@ -38,8 +38,8 @@ typedef struct plist_s {
 
 typedef error_t (op_fn)(plist_t *pl, plist_t *head);
 typedef struct {
-	char const *name;
-	char const *doc;
+	char  const *name;
+	char  const *doc;
 	op_fn *func;
 } op_entry;
 
