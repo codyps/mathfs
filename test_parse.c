@@ -57,8 +57,11 @@ int main(int argc, char **argv)
 	if (err)
 		goto done;
 
-	char buf[2048];
-	int extra = plist_to_string(&pd, buf, sizeof(buf));
+	size_t blen = plist_to_string(&pd, NULL, 0);
+
+	char *buf = malloc(blen + 1);
+
+	int extra = plist_to_string(&pd, buf, blen + 1);
 	printf("%s", buf);
 
 done:
