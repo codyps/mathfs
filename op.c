@@ -1,5 +1,6 @@
 #include "op.h"
 #include <math.h>
+#include <stdio.h> /* debug only */
 
 #define ABS(_x_)      (((_x_) >= 0) ? (_x_) : -(_x_))
 #define POW(_x_, _y_) ((num_t)pow((_x_), (_y_)))
@@ -8,6 +9,17 @@
 #else
 #define MOD(_x_, _y_) ((_x_) % (_y_))
 #endif
+
+static bool is_prime(num_t n)
+{
+	num_t i;
+	for (i = 2; i < n; ++i) {
+		if (i != n && MOD(n, i) == 0) {
+			return false;
+		}
+	}
+	return true;
+}
 
 static error_t fs_factor(plist_t *pl, plist_t *head)
 {
@@ -21,15 +33,8 @@ static error_t fs_factor(plist_t *pl, plist_t *head)
 	n = ABS(n);
 	num_t i;
 
-	for (i = 2; i < n - 1; ++i) {
-		/* Skip candidates that are not prime. */
-		bool prime = true;
-		num_t j;
-		for (j = 3; prime && j < i; ++j) {
-			prime = i != j && MOD(i, j) == 0;
-		}
-
-		if (prime && MOD(n, i) == 0) {
+	for (i = 2; i <= n; ++i) {
+		if (is_prime(i) && MOD(n, i) == 0) {
 			plist_push_num(pl, i);
 		}
 	}
