@@ -25,51 +25,65 @@
 \usepackage{verbatim}
 \usepackage{float}
 \usepackage{datatool}
-%\floatstyle{boxed} 
-%\restylefloat{figure}
 
-\title{\textbf{Homework 5}\\
-Math Filesystem via FUSE}
+\title{MathFS}
 
-\author{Michael Koval and Cody Schafer}
+\author{
+	Michael Koval \\
+	mkoval@eden.rutgers.edu
+	\and
+	Cody Schafer \\
+	cschafer@eden.rutgers.edu
+}
 \date{\today}
 \begin{document}
 \maketitle
 
-\section{Project}
-
-Impliment a filesystem that supports a range of mathematical operations.
-Each component of the path is either an operation of a number to be
-operated on. Additionally, at the top level the functions are listed.
-Documentation is supplied for each math operation within the ``doc'' file
-which is in the directory of the operation.
+\section{Project Overview}
+The final goal of this project was to a file system that supports
+on-the-fly calculation of several pre-defined mathematical operations. The
+root directory in the file system contains one directory for each
+supported mathematical function. Each of these directories contains a
+visible documentation file, \texttt{doc}, and a potentially infinite
+number of implicit files and/or sub-directories. These files or
+sub-directories are either the operation's arguments (e.g.
+\texttt{add/1/2}) numbers), or a nested operation (e.g.
+\texttt{add/1/sub/5/1}). In the case of multiple functions, the path is
+evaluated using \textit{prefix notation}.
 
 \section{Implementation}
+A parser was written with decomposes each path into a doubly linked
+list, known as a \textit{parse list}, where each node is either an
+operation, number, or unknown. Tokenizing the string in one step isolates
+the string parsing from the file system logic and simplified the
+implementation of nested functions with multiple return values.
 
-A parser was written with decomposes each path into a linked list of OPs
-(operations), NUMs (numbers), and UNKs (unknowns). Functions then operate
-on this doubly linked list (also known as the ``parse list'' or ``plist'')
-rather than using ad-hoc parsing solutions strewn throughout the codebase.
+Evaluating nested functions was implemented by using a prefix expression
+parser that iterates over the parse list in reverse order. Every number is
+pushed onto the stack until an operation is encountered. The operation
+pops the necessary number of arguments off of the stack, performs the
+requested computation, and pushes its return value(s) back onto the stack.
+All numbers that remain on the stack after the parse is complete are
+printed as output.
 
-The parser fully supports nesting of functions and multiple return values
-from the evaluation of a ``path program'' (the data returned after all
-OPs within a path are evaluated). This is implimented via a postfix
-evaluated stack-style interface, the plist is iterated over in reverse,
-and each operation pulls numbers from the elements of the plist that have
-already been considered for evaluation. The OPs then push back onto the
-stack the value(s) they wish to return.
+Unfortunately, it is not straightforward to merge this parser with a FUSE
+interface because no object in the file system can simultaneously be a file
+and a directory. Even worse, a valid implementation of \textit{getattr()}
+must unambiguously identify each part of a path as either a file or
+directory. This problem was avoided by the following assumption: a path
+points to a file if and only if it can be evaluated with no errors. If
+there is an error, it is assumed to be the beginning of a path with
+additional arguments. This renders paths similar to
+\texttt{/add/3/2/add/1/2} $\rightarrow \{5, 3\}$ invalid, but does not
+impact any common uses of nesting.
 
-For the fuse interface, objects in the filesystem cannot be said to be
-both files and directories, meaning some way to determine when a value is
-desired in the call to ``getattr'' is needed. To do this, we assume that
-once the ``path program'' successfully evaluates, that value is desired.
-This eliminates the posibility of path programs such as
-\texttt{/add/3/2/add/1/2 $\leftarrow$ 5, 3}, however this loss is not
-considered significant. Basic nesting is still maintained.
-
-
-
-
-\section{Further Possibilities}
+\section{Additional Notes}
+Due to extensive use of \textit{typedef}s and pre-processor macros, the
+internals of MathFS are mostly type-agnostic. The integral (\texttt{long})
+math operations can be replaced with their floating-point
+(\texttt{double}) equivalents by building the program with the
+\texttt{NUM\_FLOAT} pre-processor variable defined: \texttt{make clean
+\&\& make CFLAGS=-DNUM\_FLOAT}. Note that the \texttt{factor} operation is
+no longer valid and will be removed at compile time.
 
 \end{document}
