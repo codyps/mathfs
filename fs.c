@@ -122,7 +122,7 @@ static int m_readdir(const char *path, void *buf,
 
 	if (!strcmp(path, "/")) {
 		/* root dir is special, shows all functions */
-		op_entry *op;
+		op_entry const *op;
 		for(op = ops; op->name; op++) {
 			if (op->doc)
 				filler(buf, op->name, NULL, 0);
