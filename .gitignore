@@ -4,4 +4,9 @@
 mathfs
 tokenizer
 test_parse
+report.dvi
+report.aux
+report.pdf
+report.out
+report.log
 
