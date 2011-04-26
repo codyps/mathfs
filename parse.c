@@ -214,6 +214,7 @@ int item_to_string(item_t const *it, char *buf, size_t len)
 
 int plist_to_string(plist_t const *head, char *buf, size_t len)
 {
+	size_t orig_len = len;
 	int consumed = 0;
 
 	plist_t *pos;
@@ -233,8 +234,8 @@ int plist_to_string(plist_t const *head, char *buf, size_t len)
 			len = 0;
 		}
 	}
-	if (len)
-		buf[len-1] = '\0';
+	if (orig_len)
+		buf[orig_len - 1] = '\0';
 	return consumed;
 }
 
