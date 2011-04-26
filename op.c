@@ -10,6 +10,7 @@
 #define MOD(_x_, _y_) ((_x_) % (_y_))
 #endif
 
+#ifndef NUM_FLOAT
 static bool is_prime(num_t n)
 {
 	num_t i;
@@ -40,6 +41,7 @@ static error_t fs_factor(plist_t *pl, plist_t *head)
 	}
 	return 0;
 }
+#endif
 
 static error_t fs_fib(plist_t *pl, plist_t *head)
 {
