@@ -40,8 +40,7 @@ $(BIN): $(OBJ)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(FUSE_LDFLAGS) -o $@ $^
 
 .PHONY: archive
-VER:=$(shell git rev-parse --verify --short HEAD 2>/dev/null)
-PKG_NAME:=$(BIN)-g$(VER)
+PKG_NAME:=mathfs
 archive:
 	git archive --prefix='$(PKG_NAME)/' HEAD > $(PKG_NAME).tar
 

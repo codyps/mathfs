@@ -114,7 +114,8 @@ item_t *item_mk(op_entry const *ops, char const *start, char const *end)
 	it->raw[len] = 0;
 	it->raw_len = len;
 
-	int ret = sscanf(start, "%"SCNnum, &value);
+	char tmp[2];
+	int ret = sscanf(it->raw, "%"SCNnum"%2s", &value, tmp);
 
 	if (ret == 1) {
 		it->type = TT_NUM;
