@@ -231,6 +231,8 @@ int plist_to_string(plist_t const *head, char *buf, size_t len)
 			len = 0;
 		}
 	}
+	if (len)
+		buf[len-1] = '\0';
 	return consumed;
 }
 
