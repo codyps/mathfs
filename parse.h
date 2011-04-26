@@ -50,7 +50,7 @@ typedef struct item_s {
 	plist_t pl;
 } item_t;
 
-error_t tokpath(op_entry const *ops, plist_t *pl, char const *path);
+void tokpath(op_entry const *ops, plist_t *pl, char const *path);
 
 error_t plist_pop_num(plist_t *pl, plist_t *head, num_t *num);
 item_t *plist_pop(plist_t *pl);

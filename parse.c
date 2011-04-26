@@ -235,7 +235,7 @@ int plist_to_string(plist_t const *head, char *buf, size_t len)
 /*
  * Tokenizer
  */
-error_t tokpath(op_entry const *ops, plist_t *pl, char const *path)
+void tokpath(op_entry const *ops, plist_t *pl, char const *path)
 {
 	char const *p;
 	char const *tok_start = path;
@@ -251,6 +251,4 @@ error_t tokpath(op_entry const *ops, plist_t *pl, char const *path)
 		if (*p == '\0')
 			break;
 	}
-
-	return 0;
 }

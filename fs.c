@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
 
+#include <errno.h>
+
 #include "parse.h"
 #include "eval.h"
 
@@ -117,9 +119,7 @@ static int m_getattr(const char *path, struct stat *stbuf)
 	plist_t pl;
 	plist_init(&pl);
 
-	error_t e = tokpath(ops, &pl, path + 1);
-	if (e)
-		return -1;
+	tokpath(ops, &pl, path + 1);
 
 	memset(stbuf, 0, sizeof(*stbuf));
 
@@ -128,7 +128,6 @@ static int m_getattr(const char *path, struct stat *stbuf)
 	case PT_NORMAL:
 		/* do some extra checking here to see if eval
 		 * succeeds. */
-		fprintf(stderr, "-- pt_normal\n");
 		if (eval(&pl)) {
 			/* fails, maybe we need more stuff?
 			 * Make it a dir. */
@@ -140,24 +139,20 @@ static int m_getattr(const char *path, struct stat *stbuf)
 		break;
 
 	case PT_ROOT:
-		fprintf(stderr, "-- pt_root\n");
 		stbuf->st_mode  = S_IFDIR | 0755;
 		break;
 
 	case PT_DOC:
-		fprintf(stderr, "-- pt_doc\n");
 		stbuf->st_mode = S_IFREG | 0644;
 		break;
 
 	case PT_UNK:
-		fprintf(stderr, "-- pt_unk\n");
 		plist_destroy(&pl);
-		return -1;
+		return -ENOENT;
 
 	}
 
 	stbuf->st_size  = 4096;
-	stbuf->st_blksize = stbuf->st_size;
 	stbuf->st_blocks = stbuf->st_size / 512;
 
 	plist_destroy(&pl);
@@ -181,9 +176,7 @@ static int m_readdir(const char *path, void *buf,
 
 		plist_t pl;
 		plist_init(&pl);
-		error_t r = tokpath(ops, &pl, path + 1);
-		if (r)
-			return -1;
+		tokpath(ops, &pl, path + 1);
 
 		/* Check if last element in path is in the op table */
 		if (!plist_is_empty(&pl)
@@ -211,9 +204,7 @@ static int m_open(const char *path, struct fuse_file_info *fi)
 
 	plist_t pl;
 	plist_init(&pl);
-	error_t r = tokpath(ops, &pl, path + 1);
-	if (r)
-		return -1;
+	tokpath(ops, &pl, path + 1);
 
 	enum path_type pt = path_type(&pl);
 

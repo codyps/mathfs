@@ -51,11 +51,11 @@ int main(int argc, char **argv)
 	plist_t pd;
 	plist_init(&pd);
 
-	err = tokpath(ops, &pd, argv[1]);
-	if (err) goto done;
+	tokpath(ops, &pd, argv[1]);
 
 	err = eval(&pd);
-	if (err) goto done;
+	if (err)
+		goto done;
 
 	char buf[2048];
 	int extra = plist_to_string(&pd, buf, sizeof(buf));
