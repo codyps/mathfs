@@ -115,7 +115,9 @@ static error_t fs_exp(plist_t *pl, plist_t *head)
 }
 
 op_entry ops [] = {
+#ifndef NUM_FLOAT
 	OP("factor", "computes the prime factors of a number", &fs_factor),
+#endif
 	OP("fib",    "computes the first n fibonacci numbers", &fs_fib),
 	OP("add",    "adds two numbers",                       &fs_add),
 	OP("sub",    "subtracts two inputs",                   &fs_sub),
