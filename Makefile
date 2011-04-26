@@ -4,15 +4,17 @@ BIN = mathfs test_parse
 .PHONY: all
 all: build
 
-mathfs: fs.c.o error.c.o parse.c.o eval.c.o
+mathfs: fs.c.o error.c.o parse.c.o eval.c.o op.c.o
 
-test_parse: error.c.o parse.c.o eval.c.o test_parse.c.o
+test_parse: error.c.o parse.c.o eval.c.o test_parse.c.o op.c.o
 
 CC = gcc
 RM = rm -f
 
-CFLAGS = -ggdb
-override CFLAGS += -Wall -pipe -MMD
+CFLAGS  = -ggdb
+LDFLAGS =
+override CFLAGS  += -Wall -pipe -MMD
+override LDFLAGS += -lm
 FUSE_CFLAGS  := $(shell pkg-config fuse --cflags)
 FUSE_LDFLAGS := $(shell pkg-config fuse --libs)
 
@@ -31,7 +33,7 @@ clean:
 	$(CC) $(CFLAGS) $(FUSE_CFLAGS) -c -o $@ $<
 
 $(BIN): $(OBJ)
-	$(CC) $(CFLAGS) $(FUSE_LDFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) $(LDFLAGS) $(FUSE_LDFLAGS) -o $@ $^
 
 .PHONY: archive
 VER:=$(shell git rev-parse --verify --short HEAD 2>/dev/null)

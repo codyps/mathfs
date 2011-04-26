@@ -6,6 +6,7 @@ typedef enum {
 	ERR_UNDEF_OP,
 	ERR_TOO_FEW,
 	ERR_NOT_INT,
+	ERR_NOT_VALID,
 } error_t;
 
 char const *error_msg(error_t err);

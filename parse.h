@@ -6,9 +6,15 @@
 #include <stdbool.h>
 #include <stddef.h> /* offsetof */
 
+#ifdef NUM_FLOAT
 typedef double num_t;
 #define PRInum "f"
 #define SCNnum "lf"
+#else
+typedef long num_t;
+#define PRInum "ld"
+#define SCNnum "ld"
+#endif
 
 enum token_type {
 	TT_OP,

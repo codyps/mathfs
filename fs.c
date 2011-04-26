@@ -1,4 +1,3 @@
-
 #define FUSE_USE_VERSION 26
 #include <fuse.h>
 
@@ -8,58 +7,10 @@
 
 #include "parse.h"
 #include "eval.h"
+#include "op.h"
 
 /* debug only */
 #include <stdio.h>
-
-static error_t add(plist_t *pl, plist_t *head)
-{
-	num_t x, y;
-	error_t err;
-
-	err = plist_pop_num(pl, head, &x);
-	if (err) return err;
-	err = plist_pop_num(pl, head, &y);
-	if (err) return err;
-
-	plist_push_num(pl, x + y);
-	return 0;
-}
-
-static error_t sub(plist_t *pl, plist_t *head)
-{
-	num_t x, y;
-	error_t err;
-
-	err = plist_pop_num(pl, head, &x);
-	if (err) return err;
-	err = plist_pop_num(pl, head, &y);
-	if (err) return err;
-
-	plist_push_num(pl, x - y);
-	return 0;
-}
-
-
-#if 0
-static error_t doc(plist_t *pl, plist_t *head)
-{
-	/* consume all the elements upward. If the directly previous one is
-	 * not a TT_OP, error. If there is another doc before this one, error.
-	 * If there is anything left following consuming upward, error.
-	 */
-}
-#endif
-
-static op_entry ops [] = {
-	OP("add", "addition, anyone?" , add),
-	OP("sub", "well, it subtracts", sub),
-#if 0
-	OP("doc", NULL, doc),
-#endif
-	{}
-};
-
 
 enum path_type {
 	PT_ROOT,
