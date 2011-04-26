@@ -2,7 +2,7 @@ OBJ =
 BIN = mathfs test_parse
 
 .PHONY: all
-all: build
+all: build-int
 
 mathfs: fs.c.o error.c.o parse.c.o eval.c.o op.c.o
 
@@ -18,8 +18,12 @@ override LDFLAGS += -lm
 FUSE_CFLAGS  := $(shell pkg-config fuse --cflags)
 FUSE_LDFLAGS := $(shell pkg-config fuse --libs)
 
-.PHONY: build
-build: $(BIN)
+.PHONY: build-int
+build-int: $(BIN)
+
+.PHONY: build-float
+build-float: CFLAGS+=-DNUM_FLOAT
+build-float: $(BIN)
 
 .PHONY: rebuild
 rebuild: | clean
