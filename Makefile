@@ -1,12 +1,10 @@
 OBJ = 
-BIN = mathfs test_parse
+BIN = mathfs
 
 .PHONY: all
 all: build-int
 
 mathfs: fs.c.o error.c.o parse.c.o eval.c.o op.c.o
-
-test_parse: error.c.o parse.c.o eval.c.o test_parse.c.o op.c.o
 
 CC = gcc
 RM = rm -f
