@@ -1,3 +1,6 @@
+/* Copyright 2011, Cody Schafer <cpschafer@gmail.com>
+ */
+
 #include "parse.h"
 #include <string.h>
 #include <stdio.h> /* sscanf */

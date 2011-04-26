@@ -1,3 +1,9 @@
+
+/* Mathfs filesystem
+ *
+ * Copyright 2011, Cody Schafer <cpschafer@gmail.com>
+ */
+
 #include "eval.h"
 #include "error.h"
 

@@ -1,4 +1,10 @@
 
+/* Mathfs filesystem
+ *
+ * Copyright 2011, Cody Schafer <cpschafer@gmail.com>
+ */
+
+
 #define FUSE_USE_VERSION 26
 #include <fuse.h>
 

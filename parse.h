@@ -1,6 +1,9 @@
 #ifndef PARSE_H_
 #define PARSE_H_
 
+/* Copyright 2011, Cody Schafer <cpschafer@gmail.com>
+ */
+
 #include "error.h"
 #include <stdlib.h> /* size_t */
 #include <stdbool.h>
