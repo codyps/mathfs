@@ -31,7 +31,7 @@ rebuild: | clean
 
 .PHONY: clean
 clean:
-	$(RM) $(BIN) $(BIN)-g*.tar *.d *.o $(OBJ)
+	$(RM) $(BIN) $(BIN).tar *.d *.o $(OBJ)
 
 %.c.o : %.c
 	$(CC) $(CFLAGS) $(FUSE_CFLAGS) -c -o $@ $<
