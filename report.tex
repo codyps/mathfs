@@ -2,7 +2,6 @@
  * Cody Schafer <cpschafer@gmail.com>
  * Michael Koval <koval.michael@gmail.com>
  */
-% ex: tw=74 
 % ex: tw=74 ts=2 sw=2 noet sts=2
 \documentclass[10pt]{article}
 \usepackage[utf8]{inputenc}
@@ -39,9 +38,37 @@ Math Filesystem via FUSE}
 
 \section{Project}
 
-\section{Results}
+Impliment a filesystem that supports a range of mathematical operations.
+Each component of the path is either an operation of a number to be
+operated on. Additionally, at the top level the functions are listed.
+Documentation is supplied for each math operation within the ``doc'' file
+which is in the directory of the operation.
 
 \section{Implementation}
+
+A parser was written with decomposes each path into a linked list of OPs
+(operations), NUMs (numbers), and UNKs (unknowns). Functions then operate
+on this doubly linked list (also known as the ``parse list'' or ``plist'')
+rather than using ad-hoc parsing solutions strewn throughout the codebase.
+
+The parser fully supports nesting of functions and multiple return values
+from the evaluation of a ``path program'' (the data returned after all
+OPs within a path are evaluated). This is implimented via a postfix
+evaluated stack-style interface, the plist is iterated over in reverse,
+and each operation pulls numbers from the elements of the plist that have
+already been considered for evaluation. The OPs then push back onto the
+stack the value(s) they wish to return.
+
+For the fuse interface, objects in the filesystem cannot be said to be
+both files and directories, meaning some way to determine when a value is
+desired in the call to ``getattr'' is needed. To do this, we assume that
+once the ``path program'' successfully evaluates, that value is desired.
+This eliminates the posibility of path programs such as
+\texttt{/add/3/2/add/1/2 $\larrow$ 5, 3}, however this loss is not
+considered significant. Basic nesting is still maintained.
+
+
+
 
 \section{Further Possibilities}
 
