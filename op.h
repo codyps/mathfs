@@ -5,7 +5,7 @@
 #include "parse.h"
 
 #define OP(name, doc, func) { name, doc, func }
-#define OP_END()
+#define OP_END() {}
 
 const extern op_entry ops[];
 
