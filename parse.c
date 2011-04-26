@@ -1,8 +1,14 @@
+/*
+ * Cody Schafer <cpschafer@gmail.com>
+ * Michael Koval <koval.michael@gmail.com>
+ */
+
 #include "parse.h"
 #include <string.h>
 #include <stdio.h> /* sscanf */
 
-static op_entry const *op_lookup(op_entry const *table, char const *start, const char *end)
+static op_entry const *op_lookup(op_entry const *table,
+		char const *start, const char *end)
 {
 	op_entry const *op = table;
 
@@ -198,11 +204,6 @@ int item_to_string(item_t const *it, char *buf, size_t len)
 	case TT_UNK:
 		return snprintf(buf, len, "%s\n", it->raw);
 
-#if 0
-	case TT_DOC:
-		return snprintf(buf, len, "%s\n", it->op_e->doc);
-#endif
-
 	default:
 		return -1;
 
@@ -219,23 +220,28 @@ int plist_to_string(plist_t const *head, char *buf, size_t len)
 	plist_for_each(pos, head) {
 		item_t *it = item_entry(pos);
 
-		size_t l = MAX((ssize_t)len - consumed, 0);
-		int n = item_to_string(it, buf + consumed, l);
+		int n = item_to_string(it, buf + consumed, len);
 
 		if (n < 0) {
 			return n;
 		}
 
 		consumed += n;
+		if (len && len > n) {
+			len -= n;
+		} else {
+			len = 0;
+		}
 	}
-
+	if (len)
+		buf[len-1] = '\0';
 	return consumed;
 }
 
 /*
  * Tokenizer
  */
-error_t tokpath(op_entry const *ops, plist_t *pl, char const *path)
+void tokpath(op_entry const *ops, plist_t *pl, char const *path)
 {
 	char const *p;
 	char const *tok_start = path;
@@ -251,6 +257,4 @@ error_t tokpath(op_entry const *ops, plist_t *pl, char const *path)
 		if (*p == '\0')
 			break;
 	}
-
-	return 0;
 }

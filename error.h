@@ -1,3 +1,7 @@
+/*
+ * Cody Schafer <cpschafer@gmail.com>
+ * Michael Koval <koval.michael@gmail.com>
+ */
 #ifndef MATHFS_ERROR_H_
 #define MATHFS_ERROR_H_
 

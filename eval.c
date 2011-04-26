@@ -1,7 +1,9 @@
+/*
+ * Cody Schafer <cpschafer@gmail.com>
+ * Michael Koval <koval.michael@gmail.com>
+ */
 #include "eval.h"
 #include "error.h"
-
-#include <stdio.h>
 
 error_t eval(plist_t *head)
 {

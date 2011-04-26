@@ -1,3 +1,7 @@
+/*
+ * Cody Schafer <cpschafer@gmail.com>
+ * Michael Koval <koval.michael@gmail.com>
+ */
 #include "error.h"
 
 char const *error_msg(error_t err)
